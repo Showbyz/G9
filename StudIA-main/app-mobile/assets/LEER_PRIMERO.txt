@@ -1,0 +1,17 @@
+ASSETS FALTANTES
+================
+
+Para evitar errores, necesitas crear estos archivos de imagen:
+
+1. icon.png (1024x1024 px) - Icono de la app
+2. splash.png (1242x2436 px) - Pantalla de inicio
+3. favicon.png (48x48 px) - Favicon para web
+
+POR AHORA, puedes usar cualquier imagen PNG y renombrarla.
+
+O puedes descargar iconos gratuitos desde:
+- https://www.flaticon.com/
+- https://icons8.com/
+
+La app funcionará sin estos archivos, solo verás advertencias.
+

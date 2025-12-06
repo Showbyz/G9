@@ -1,0 +1,59 @@
+{% extends "globalAdmin/base.html" %}
+{% load static %}
+
+{% block title %}Dashboard Administración Global{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1>Panel de Administración Global</h1>
+            <p class="text-muted">Bienvenido, {{ user.nombre }}</p>
+            <hr>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h5 class="card-title">Total Tenants</h5>
+                    <h2>{{ total_tenants }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h5 class="card-title">Tenants Activos</h5>
+                    <h2>{{ active_tenants }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <h5 class="card-title">Tenants Inactivos</h5>
+                    <h2>{{ total_tenants|add:"-"|add:active_tenants }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5>Gestión de Tenants</h5>
+                    <a href="{% url 'global_admin:tenant_create' %}" class="btn btn-success">Crear Nuevo Tenant</a>
+                </div>
+                <div class="card-body">
+                    <a href="{% url 'global_admin:tenant_list' %}" class="btn btn-primary">Ver Todos los Tenants</a>
+                    <a href="{% url 'global_admin:logout' %}" class="btn btn-secondary">Cerrar Sesión</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

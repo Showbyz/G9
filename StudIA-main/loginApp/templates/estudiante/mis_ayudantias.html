@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .inscripcion-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+        overflow: hidden;
+    }
+    
+    .inscripcion-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .inscripcion-header {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        padding: 20px;
+    }
+    
+    .inscripcion-title {
+        font-size: 1.3rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    
+    .inscripcion-asignatura {
+        background: rgba(255,255,255,0.2);
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        display: inline-block;
+        margin-bottom: 10px;
+    }
+    
+    .inscripcion-body {
+        padding: 20px;
+    }
+    
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .info-label {
+        font-weight: bold;
+        color: #495057;
+        display: flex;
+        align-items: center;
+    }
+    
+    .info-value {
+        color: #6c757d;
+    }
+    
+    .tutor-info {
+        background: #e3f2fd;
+        border-left: 4px solid #2196f3;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    
+    .tutor-name {
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: #1976d2;
+    }
+    
+    .btn-cancelar {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        border: none;
+        border-radius: 25px;
+        padding: 10px 25px;
+        color: white;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-cancelar:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        color: white;
+    }
+    
+    .estado-badge {
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+    
+    .estado-activa {
+        background-color: #28a745;
+        color: white;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+    
+    .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .stats-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    
+    .stats-label {
+        font-size: 1rem;
+        opacity: 0.9;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-calendar-check"></i> Mis Ayudantías</h2>
+                <a href="{% url 'estudiante_asignaturas' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-book"></i> Ver Asignaturas
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-6 offset-md-3">
+            <div class="stats-card">
+                <div class="stats-number">{{ inscripciones.count }}</div>
+                <div class="stats-label">Ayudantías Inscritas</div>
+            </div>
+        </div>
+    </div>
+    
+    {% if inscripciones %}
+    <div class="row">
+        {% for inscripcion in inscripciones %}
+        <div class="col-md-6 col-lg-4">
+            <div class="inscripcion-card">
+                <div class="inscripcion-header">
+                    <div class="inscripcion-asignatura">
+                        <i class="fas fa-book"></i> {{ inscripcion.ayudantia.asignatura.nombre }}
+                    </div>
+                    <div class="inscripcion-title">{{ inscripcion.ayudantia.titulo }}</div>
+                </div>
+                <div class="inscripcion-body">
+                    <div class="info-row">
+                        <div class="info-label">
+                            <i class="fas fa-calendar"></i> Fecha:
+                        </div>
+                        <div class="info-value">{{ inscripcion.ayudantia.fecha|date:"d/m/Y" }}</div>
+                    </div>
+                    
+                    <div class="info-row">
+                        <div class="info-label">
+                            <i class="fas fa-clock"></i> Horario:
+                        </div>
+                        <div class="info-value">{{ inscripcion.ayudantia.horario|time:"H:i" }}</div>
+                    </div>
+                    
+                    <div class="info-row">
+                        <div class="info-label">
+                            <i class="fas fa-door-open"></i> Sala:
+                        </div>
+                        <div class="info-value">{{ inscripcion.ayudantia.sala }}</div>
+                    </div>
+                    
+                    <div class="info-row">
+                        <div class="info-label">
+                            <i class="fas fa-hourglass-half"></i> Duración:
+                        </div>
+                        <div class="info-value">{{ inscripcion.ayudantia.duracion }} min</div>
+                    </div>
+                    
+                    <div class="tutor-info">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>Tutor:</strong>
+                                <div class="tutor-name">{{ inscripcion.ayudantia.tutor.nombre_usuario }}</div>
+                            </div>
+                            <span class="estado-badge estado-activa">{{ inscripcion.estado|title }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <small class="text-muted">
+                            <i class="fas fa-calendar-plus"></i> Inscrito: {{ inscripcion.fecha_inscripcion|date:"d/m/Y H:i" }}
+                        </small>
+                        <a href="{% url 'estudiante_cancelar_inscripcion' inscripcion.id_inscripcion %}" 
+                           class="btn btn-cancelar"
+                           onclick="return confirm('¿Estás seguro de que quieres cancelar tu inscripción?')">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-calendar-times"></i>
+        <h4>No tienes ayudantías inscritas</h4>
+        <p>Explora las asignaturas disponibles y únete a las ayudantías que te interesen.</p>
+        <a href="{% url 'estudiante_asignaturas' %}" class="btn btn-primary btn-lg mt-3">
+            <i class="fas fa-book"></i> Ver Asignaturas
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

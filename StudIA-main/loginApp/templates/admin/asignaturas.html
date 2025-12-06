@@ -1,0 +1,431 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .asignatura-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+    }
+    
+    .asignatura-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .asignatura-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 15px 15px 0 0;
+    }
+    
+    .asignatura-body {
+        padding: 20px;
+        background: white;
+        border-radius: 0 0 15px 15px;
+    }
+    
+    .asignatura-title {
+        font-size: 1.3rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    
+    .asignatura-code {
+        background: rgba(255,255,255,0.2);
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        display: inline-block;
+        margin-bottom: 10px;
+    }
+    
+    .form-container {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .form-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #495057;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-label {
+        font-weight: bold;
+        color: #495057;
+        margin-bottom: 8px;
+    }
+    
+    .form-control {
+        border-radius: 10px;
+        border: 1px solid #dee2e6;
+        padding: 12px 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    
+    .btn-create {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        border-radius: 25px;
+        padding: 12px 30px;
+        color: white;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-create:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        color: white;
+    }
+    
+    .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .stats-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    
+    .stats-label {
+        font-size: 1rem;
+        opacity: 0.9;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+    
+    .filter-container {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .filter-label {
+        font-weight: bold;
+        color: #495057;
+        margin-bottom: 10px;
+        font-size: 1.1rem;
+    }
+    
+    .filter-select {
+        width: 100%;
+        padding: 12px 15px;
+        border-radius: 10px;
+        border: 2px solid #667eea;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+    
+    .filter-select:focus {
+        outline: none;
+        border-color: #764ba2;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    
+    .selected-asignatura-container {
+        animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .no-selection {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .no-selection i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-book"></i> Gestión de Asignaturas</h2>
+                <a href="{% url 'admin_crear_ayudantia' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-chalkboard-teacher"></i> Crear Ayudantía
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="stats-card">
+                <div class="stats-number">{{ asignaturas.count }}</div>
+                <div class="stats-label">Total Asignaturas</div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="stats-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <div class="stats-number">{{ asignaturas_activas }}</div>
+                <div class="stats-label">Activas (Con Ayudantías)</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Formulario para crear asignatura -->
+    <div class="form-container">
+        <div class="form-title">
+            <i class="fas fa-plus"></i> Crear Nueva Asignatura
+        </div>
+        <form method="post">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.nombre.id_for_label }}">{{ form.nombre.label }}</label>
+                        {{ form.nombre }}
+                        {% if form.nombre.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.nombre.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.codigo.id_for_label }}">{{ form.codigo.label }}</label>
+                        {{ form.codigo }}
+                        {% if form.codigo.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.codigo.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.carrera.id_for_label }}">{{ form.carrera.label }}</label>
+                        {{ form.carrera }}
+                        {% if form.carrera.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.carrera.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.descripcion.id_for_label }}">{{ form.descripcion.label }}</label>
+                        {{ form.descripcion }}
+                        {% if form.descripcion.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.descripcion.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="text-center">
+                <button type="submit" class="btn btn-create">
+                    <i class="fas fa-save"></i> Crear Asignatura
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Filtro desplegable para seleccionar asignatura -->
+    {% if asignaturas %}
+    <div class="filter-container">
+        <label class="filter-label" for="asignatura-filter">
+            <i class="fas fa-filter"></i> Seleccionar Asignatura
+        </label>
+        <select id="asignatura-filter" class="filter-select" onchange="mostrarAsignatura(this.value)">
+            <option value="">-- Seleccione una asignatura --</option>
+            {% for asignatura in asignaturas %}
+            <option value="{{ asignatura.id_asignatura }}" {% if asignatura_seleccionada and asignatura_seleccionada.id_asignatura == asignatura.id_asignatura %}selected{% endif %}>
+                {{ asignatura.codigo }} - {{ asignatura.nombre }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    <!-- Tarjeta de asignatura seleccionada -->
+    {% if asignatura_seleccionada %}
+    <div class="selected-asignatura-container">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="asignatura-card">
+                    <div class="asignatura-header">
+                        <div class="asignatura-code">{{ asignatura_seleccionada.codigo }}</div>
+                        <div class="asignatura-title">{{ asignatura_seleccionada.nombre }}</div>
+                    </div>
+                    <div class="asignatura-body">
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-graduation-cap"></i> {{ asignatura_seleccionada.carrera }}
+                        </p>
+                        {% if asignatura_seleccionada.descripcion %}
+                        <p class="text-muted mb-3">{{ asignatura_seleccionada.descripcion }}</p>
+                        {% else %}
+                        <p class="text-muted mb-3"><em>Sin descripción disponible.</em></p>
+                        {% endif %}
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <small class="text-muted">
+                                <i class="fas fa-clock"></i> Creada: {{ asignatura_seleccionada.created_at|date:"d/m/Y" }}
+                            </small>
+                            <span class="badge bg-{% if asignatura_seleccionada.tiene_ayudantias %}success{% else %}danger{% endif %}">
+                                {% if asignatura_seleccionada.tiene_ayudantias %}
+                                    <i class="fas fa-check-circle"></i> Activa
+                                {% else %}
+                                    <i class="fas fa-times-circle"></i> Sin Ayudantías
+                                {% endif %}
+                            </span>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'admin_editar_asignatura' asignatura_seleccionada.id_asignatura %}" 
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-edit"></i> Editar
+                                </a>
+                                <a href="{% url 'admin_eliminar_asignatura' asignatura_seleccionada.id_asignatura %}" 
+                                   class="btn btn-sm btn-outline-danger"
+                                   onclick="return confirmEliminarAsignatura('{{ asignatura_seleccionada.nombre }}', {{ asignatura_seleccionada.total_ayudantias_cursadas|default:0 }}, {{ asignatura_seleccionada.total_ayudantias|default:0 }})">
+                                    <i class="fas fa-trash"></i> Eliminar
+                                </a>
+                            </div>
+                            <small class="text-muted">
+                                {% if asignatura_seleccionada.tiene_ayudantias %}
+                                    <i class="fas fa-chalkboard-teacher"></i> Con ayudantías activas
+                                {% elif asignatura_seleccionada.tiene_ayudantias_cursadas %}
+                                    <i class="fas fa-history"></i> Con {{ asignatura_seleccionada.total_ayudantias_cursadas }} ayudantía(s) cursada(s) en historial
+                                {% else %}
+                                    <i class="fas fa-exclamation-triangle"></i> Sin ayudantías
+                                {% endif %}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% elif asignaturas.count > 0 %}
+    <!-- Mensaje cuando no hay asignatura seleccionada pero hay asignaturas disponibles -->
+    <div class="no-selection">
+        <i class="fas fa-hand-pointer"></i>
+        <h4>Seleccione una asignatura</h4>
+        <p>Use el filtro de arriba para seleccionar una asignatura y ver sus detalles.</p>
+    </div>
+    {% endif %}
+    {% else %}
+    <!-- Mensaje cuando no hay asignaturas -->
+    <div class="empty-state">
+        <i class="fas fa-book-open"></i>
+        <h4>No hay asignaturas creadas</h4>
+        <p>Usa el formulario de arriba para crear la primera asignatura.</p>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+// Función para mostrar la asignatura seleccionada
+function mostrarAsignatura(asignaturaId) {
+    if (asignaturaId) {
+        // Redirigir a la misma página con el parámetro de asignatura seleccionada
+        const url = new URL(window.location.href);
+        url.searchParams.set('asignatura_id', asignaturaId);
+        window.location.href = url.toString();
+    } else {
+        // Si no hay selección, redirigir sin parámetros
+        const url = new URL(window.location.href);
+        url.searchParams.delete('asignatura_id');
+        window.location.href = url.toString();
+    }
+}
+
+// Función para confirmar eliminación de asignatura con advertencia sobre ayudantías cursadas
+function confirmEliminarAsignatura(nombreAsignatura, ayudantiasCursadas, totalAyudantias) {
+    let mensaje = `¿Estás seguro de que quieres eliminar la asignatura "${nombreAsignatura}"?\n\n`;
+    
+    if (totalAyudantias > 0) {
+        mensaje += `ADVERTENCIA: Esta asignatura tiene ${totalAyudantias} ayudantía(s) asociada(s).\n`;
+        if (ayudantiasCursadas > 0) {
+            mensaje += `Incluyendo ${ayudantiasCursadas} ayudantía(s) cursada(s) en el historial.\n\n`;
+        }
+        mensaje += `Al eliminar la asignatura, se eliminarán TODAS las ayudantías relacionadas (activas y cursadas) y todas las inscripciones asociadas.\n\n`;
+        mensaje += `Esta acción NO se puede deshacer.`;
+    } else {
+        mensaje += `Esta acción no se puede deshacer.`;
+    }
+    
+    return confirm(mensaje);
+}
+
+// Mantener el valor seleccionado después de recargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    const select = document.getElementById('asignatura-filter');
+    if (select) {
+        // El valor ya está establecido en el template con el atributo 'selected'
+        // No necesitamos hacer nada adicional
+    }
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,287 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .form-container {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 40px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .form-title {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #495057;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .form-group {
+        margin-bottom: 25px;
+    }
+    
+    .form-label {
+        font-weight: bold;
+        color: #495057;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .form-label i {
+        margin-right: 8px;
+        color: #667eea;
+    }
+    
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 1px solid #dee2e6;
+        padding: 12px 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+    
+    .form-row-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 20px;
+    }
+    
+    .btn-create {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        border-radius: 25px;
+        padding: 15px 40px;
+        color: white;
+        font-weight: bold;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+    
+    .btn-create:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        color: white;
+    }
+    
+    .btn-back {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        border: none;
+        border-radius: 25px;
+        padding: 12px 30px;
+        color: white;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-back:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+        color: white;
+    }
+    
+    .error-messages {
+        list-style-type: none;
+        padding: 0;
+        margin-top: 5px;
+    }
+    
+    .error-messages li {
+        background-color: #f8d7da;
+        color: #721c24;
+        padding: 8px 12px;
+        border-radius: 5px;
+        margin-bottom: 5px;
+        border-left: 4px solid #dc3545;
+    }
+    
+    .help-text {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-top: 5px;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-chalkboard-teacher"></i> Crear Nueva Ayudantía</h2>
+                <a href="{% url 'admin_asignaturas' %}" class="btn btn-back">
+                    <i class="fas fa-arrow-left"></i> Volver a Asignaturas
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="form-container">
+        <div class="form-title">
+            <i class="fas fa-plus"></i> Crear Ayudantía
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            
+            <!-- Información básica -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.asignatura.id_for_label }}">
+                        <i class="fas fa-book"></i>{{ form.asignatura.label }}
+                    </label>
+                    {{ form.asignatura }}
+                    {% if form.asignatura.errors %}
+                        <ul class="error-messages">
+                            {% for error in form.asignatura.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.tutor.id_for_label }}">
+                        <i class="fas fa-user-tie"></i>{{ form.tutor.label }}
+                    </label>
+                    {{ form.tutor }}
+                    {% if form.tutor.errors %}
+                        <ul class="error-messages">
+                            {% for error in form.tutor.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="{{ form.titulo.id_for_label }}">
+                    <i class="fas fa-heading"></i>{{ form.titulo.label }}
+                </label>
+                {{ form.titulo }}
+                {% if form.titulo.errors %}
+                    <ul class="error-messages">
+                        {% for error in form.titulo.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="{{ form.descripcion.id_for_label }}">
+                    <i class="fas fa-align-left"></i>{{ form.descripcion.label }}
+                </label>
+                {{ form.descripcion }}
+                {% if form.descripcion.errors %}
+                    <ul class="error-messages">
+                        {% for error in form.descripcion.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+            
+            <!-- Información de ubicación y horario -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.sala.id_for_label }}">
+                        <i class="fas fa-door-open"></i>{{ form.sala.label }}
+                    </label>
+                    {{ form.sala }}
+                    {% if form.sala.errors %}
+                        <ul class="error-messages">
+                            {% for error in form.sala.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.duracion.id_for_label }}">
+                        <i class="fas fa-hourglass-half"></i>{{ form.duracion.label }}
+                    </label>
+                    {{ form.duracion }}
+                    <div class="help-text">Duración en minutos (30-180)</div>
+                    {% if form.duracion.errors %}
+                        <ul class="error-messages">
+                            {% for error in form.duracion.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.fecha.id_for_label }}">
+                        <i class="fas fa-calendar"></i>{{ form.fecha.label }}
+                    </label>
+                    {{ form.fecha }}
+                    {% if form.fecha.errors %}
+                        <ul class="error-messages">
+                            {% for error in form.fecha.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.horario.id_for_label }}">
+                        <i class="fas fa-clock"></i>{{ form.horario.label }}
+                    </label>
+                    {{ form.horario }}
+                    {% if form.horario.errors %}
+                        <ul class="error-messages">
+                            {% for error in form.horario.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Información de cupos -->
+            <div class="form-group">
+                <label class="form-label" for="{{ form.cupos_totales.id_for_label }}">
+                    <i class="fas fa-users"></i>{{ form.cupos_totales.label }}
+                </label>
+                {{ form.cupos_totales }}
+                <div class="help-text">Número de estudiantes que pueden inscribirse (mínimo: 5, máximo: 20)</div>
+                {% if form.cupos_totales.errors %}
+                    <ul class="error-messages">
+                        {% for error in form.cupos_totales.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+            
+            <!-- Botones -->
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-create">
+                    <i class="fas fa-save"></i> Crear Ayudantía
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

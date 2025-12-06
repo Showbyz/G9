@@ -1,0 +1,17 @@
+services:
+  postgres:
+    container_name: pruebasportal
+    hostname: portalAutoatencion
+    image: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # <-- LÍNEA MODIFICADA
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+
+# v-- SECCIÓN NUEVA AÑADIDA AL FINAL --v
+volumes:
+  postgres_data:

@@ -1,0 +1,76 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/login.css' %}" type="text/css">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:SemiBold&display=swap" rel="stylesheet">
+    <title></title>
+</head>
+<body> 
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: montserrat;
+            background-image: url('{% static "img/bg7.jpg" %}');
+            background-size: 100% auto;
+            background-position: center top; 
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .header-icon {
+    width: 150px; /* Ajusta el ancho según lo que necesites */
+    height: auto; /* Mantiene la proporción de la imagen */
+}
+    </style>
+    <div class="content">
+
+<header>
+    <div class="header-content">
+        <img src="{% static 'img/duoc.png' %}" alt="Icono Entel" class="header-icon">
+        <span>Bienvenido al portal de Ayudantías</span>
+    </div>
+</header>
+
+<div class="formulario">
+    <h1>Login {{ request.tenant.nombre_empresa }}</h1>
+    <form method="post" class="form">
+        {% csrf_token %}
+       
+        <div class="username">
+            <label for="email">Email</label>
+            <input type="email" name="email" id="email" required placeholder="jperez@entel.cl">
+            {% if errorEmail %}
+                <p class="error-message">{{ errorEmail }}</p>
+            {% endif %}
+        </div>
+
+        <div class="username">
+            <label for="clave">Contraseña</label>
+            <input type="password" name="clave" id="clave" required placeholder="********">
+                {% if errorClave %}
+                    <p class="error-message">{{ errorClave }}</p>
+                {% endif %}
+        </div>
+
+        <div class="recordar">¿Olvidó su contraseña?</div>
+        <input type="submit" value="Enviar">
+        <div class="registrarse">
+            <a href="#">Registrarse</a>
+        </div>
+    </form>
+</div>
+</div>
+<footer>
+    <div class="footer-content">
+        Copyright Empresa Nacional , Todos los derechos reservados.
+    </div>
+</footer>
+
+</body>
+</html>

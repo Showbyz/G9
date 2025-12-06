@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Test 2 - Mapa de Sedes{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+
+<style>
+    /* IMPORTANTE: El mapa necesita una altura definida */
+    #mapid { 
+        height: 600px; 
+        width: 100%; 
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        z-index: 1;
+    }
+    
+    .contenedor-mapa {
+        max-width: 1200px;
+        margin: 20px auto;
+        padding: 20px;
+    }
+    
+    .info-panel {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .lista-sedes {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    
+    .sede-item {
+        padding: 10px;
+        margin: 5px 0;
+        background: #f8f9fa;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    
+    .sede-item:hover {
+        background: #e9ecef;
+    }
+    
+    .badge-sede {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 0.85em;
+        margin-right: 10px;
+    }
+</style>
+
+<div class="contenedor-mapa">
+    <div class="info-panel">
+        <h1 class="mb-3">
+            <i class="fas fa-map-marked-alt"></i> Mapa de Sedes - Test 2
+        </h1>
+        <p class="lead">Encuentra tu sede para la ayudantía</p>
+        <p class="text-muted">
+            <i class="fas fa-info-circle"></i> 
+            Total de sedes activas: <strong>{{ total_sedes }}</strong>
+        </p>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-4">
+            <div class="info-panel">
+                <h5><i class="fas fa-list"></i> Lista de Sedes</h5>
+                <div class="lista-sedes" id="listaSedes">
+                    {% for sede in sedes %}
+                    <div class="sede-item" data-lat="{{ sede.latitud }}" data-lng="{{ sede.longitud }}" data-nombre="{{ sede.nombre }}">
+                        <span class="badge-sede bg-primary">{{ forloop.counter }}</span>
+                        <strong>{{ sede.nombre }}</strong><br>
+                        <small class="text-muted">
+                            <i class="fas fa-map-marker-alt"></i> {{ sede.direccion }}
+                        </small>
+                    </div>
+                    {% empty %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> No hay sedes registradas.
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="info-panel">
+                <div id="mapid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+
+<script>
+    // 1. RECIBIR DATOS DE DJANGO
+    var sedes = {{ sedes_json|safe }};
+    
+    // 2. INICIALIZAR EL MAPA
+    // Coordenadas [-33.45, -70.66] son el centro aproximado de Santiago
+    // Zoom 10 permite ver toda la región metropolitana
+    var mymap = L.map('mapid').setView([-33.45, -70.66], 10);
+    
+    // 3. CARGAR EL "SKIN" DEL MAPA (OpenStreetMap)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(mymap);
+    
+    // 4. CREAR UN GRUPO DE MARCADORES PARA PODER CONTROLARLOS
+    var markersGroup = L.layerGroup().addTo(mymap);
+    
+    // 5. DIBUJAR LOS MARCADORES (PINES)
+    var markers = [];
+    sedes.forEach(function(sede, index) {
+        // Validamos que tenga coordenadas para que no falle
+        if(sede.lat && sede.lng){
+            // Crear marcador con icono personalizado
+            var marker = L.marker([sede.lat, sede.lng], {
+                title: sede.nombre
+            }).addTo(markersGroup);
+            
+            // Agregar el popup con HTML dentro
+            marker.bindPopup(`
+                <div style="text-align:center; min-width: 200px;">
+                    <h6 style="margin-bottom: 10px; color: #007bff;">
+                        <i class="fas fa-building"></i> <b>${sede.nombre}</b>
+                    </h6>
+                    <p style="margin: 5px 0; font-size: 0.9em; color: #666;">
+                        <i class="fas fa-map-marker-alt"></i> ${sede.direccion}
+                    </p>
+                    <hr style="margin: 10px 0;">
+                    <button class="btn btn-sm btn-primary" style="width: 100%;" onclick="verTutores('${sede.nombre}')">
+                        <i class="fas fa-chalkboard-teacher"></i> Ver Tutores
+                    </button>
+                </div>
+            `);
+            
+            // Guardar referencia del marcador
+            markers.push({
+                marker: marker,
+                nombre: sede.nombre,
+                lat: sede.lat,
+                lng: sede.lng
+            });
+        }
+    });
+    
+    // 6. FUNCIÓN PARA CENTRAR EL MAPA EN UNA SEDE ESPECÍFICA
+    function centrarEnSede(lat, lng, nombre) {
+        mymap.setView([lat, lng], 15);
+        // Encontrar y abrir el popup del marcador correspondiente
+        markers.forEach(function(m) {
+            if (m.nombre === nombre) {
+                m.marker.openPopup();
+            }
+        });
+    }
+    
+    // 7. AGREGAR EVENTOS A LOS ITEMS DE LA LISTA
+    document.querySelectorAll('.sede-item').forEach(function(item) {
+        item.addEventListener('click', function() {
+            var lat = parseFloat(this.getAttribute('data-lat'));
+            var lng = parseFloat(this.getAttribute('data-lng'));
+            var nombre = this.getAttribute('data-nombre');
+            centrarEnSede(lat, lng, nombre);
+            
+            // Resaltar el item seleccionado
+            document.querySelectorAll('.sede-item').forEach(function(i) {
+                i.style.background = '#f8f9fa';
+            });
+            this.style.background = '#cfe2ff';
+        });
+    });
+    
+    // 8. FUNCIÓN PARA EL BOTÓN "Ver Tutores" (placeholder)
+    function verTutores(nombreSede) {
+        alert('Función "Ver Tutores" para ' + nombreSede + ' - Por implementar');
+        // Aquí puedes redirigir a una vista que muestre los tutores de esa sede
+        // window.location.href = '/tutores/sede/' + nombreSede;
+    }
+    
+    // 9. AJUSTAR EL MAPA PARA QUE SE VEA BIEN AL CARGAR
+    setTimeout(function() {
+        mymap.invalidateSize();
+    }, 100);
+    
+    // 10. Si hay sedes, ajustar el zoom para mostrar todas
+    if (sedes.length > 0) {
+        var bounds = [];
+        sedes.forEach(function(sede) {
+            if (sede.lat && sede.lng) {
+                bounds.push([sede.lat, sede.lng]);
+            }
+        });
+        if (bounds.length > 0) {
+            mymap.fitBounds(bounds, { padding: [50, 50] });
+        }
+    }
+</script>
+{% endblock %}
+

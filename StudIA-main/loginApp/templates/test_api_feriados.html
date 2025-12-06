@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+{% block title %}Test API - Feriados{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4 text-white">
+                <i class="fas fa-calendar-alt"></i> Test API - Feriados de Chile
+            </h1>
+            
+            {% if error %}
+            <div class="alert alert-danger" role="alert">
+                <i class="fas fa-exclamation-triangle"></i> <strong>Error:</strong> {{ error }}
+            </div>
+            {% endif %}
+            
+            {% if status_api %}
+            <div class="alert alert-info" role="alert">
+                <i class="fas fa-info-circle"></i> <strong>Estado de la API:</strong> 
+                <span class="badge bg-{% if status_api == 'success' %}success{% else %}warning{% endif %}">{{ status_api }}</span>
+                <br>
+                <small><strong>URL:</strong> {{ api_url }}</small>
+            </div>
+            {% endif %}
+            
+            {% if feriados %}
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body text-center">
+                            <h5 class="card-title"><i class="fas fa-calendar-check"></i> Total Feriados</h5>
+                            <h2>{{ total_feriados }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-info text-white">
+                        <div class="card-body text-center">
+                            <h5 class="card-title"><i class="fas fa-landmark"></i> Civiles</h5>
+                            <h2>{{ feriados_civiles|length }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-secondary text-white">
+                        <div class="card-body text-center">
+                            <h5 class="card-title"><i class="fas fa-church"></i> Religiosos</h5>
+                            <h2>{{ feriados_religiosos|length }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Filtros -->
+            <div class="mb-3">
+                <button class="btn btn-outline-primary btn-sm" onclick="filtrarPorTipo('todos')">
+                    <i class="fas fa-list"></i> Todos
+                </button>
+                <button class="btn btn-outline-info btn-sm" onclick="filtrarPorTipo('Civil')">
+                    <i class="fas fa-landmark"></i> Civiles
+                </button>
+                <button class="btn btn-outline-secondary btn-sm" onclick="filtrarPorTipo('Religioso')">
+                    <i class="fas fa-church"></i> Religiosos
+                </button>
+                <button class="btn btn-outline-warning btn-sm" onclick="filtrarPorTipo('inalienable')">
+                    <i class="fas fa-lock"></i> Irrenunciables
+                </button>
+            </div>
+            
+            <!-- Tabla de feriados -->
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="fas fa-list"></i> Lista de Feriados 2025</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover" id="tablaFeriados">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th><i class="fas fa-calendar"></i> Fecha</th>
+                                    <th><i class="fas fa-tag"></i> Título</th>
+                                    <th><i class="fas fa-bookmark"></i> Tipo</th>
+                                    <th><i class="fas fa-lock"></i> Irrenunciable</th>
+                                    <th><i class="fas fa-info-circle"></i> Información Adicional</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for feriado in feriados %}
+                                <tr data-tipo="{{ feriado.type }}" data-inalienable="{{ feriado.inalienable }}">
+                                    <td>
+                                        <strong>{{ feriado.date }}</strong>
+                                        {% if feriado.date|date:"Y-m-d" >= "now"|date:"Y-m-d" %}
+                                        <span class="badge bg-success">Próximo</span>
+                                        {% endif %}
+                                    </td>
+                                    <td><strong>{{ feriado.title }}</strong></td>
+                                    <td>
+                                        <span class="badge bg-{% if feriado.type == 'Civil' %}info{% else %}secondary{% endif %}">
+                                            {{ feriado.type }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if feriado.inalienable %}
+                                        <span class="badge bg-warning text-dark">
+                                            <i class="fas fa-lock"></i> Sí
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-light text-dark">
+                                            <i class="fas fa-unlock"></i> No
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                    <td><small>{{ feriado.extra }}</small></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sección de feriados irrenunciables destacados -->
+            {% if feriados_inalienables %}
+            <div class="card mt-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Feriados Irrenunciables</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for feriado in feriados_inalienables %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card border-warning">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-calendar-day"></i> {{ feriado.date }}
+                                    </h6>
+                                    <p class="card-text mb-1"><strong>{{ feriado.title }}</strong></p>
+                                    <small class="text-muted">{{ feriado.extra }}</small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% else %}
+            <div class="alert alert-warning" role="alert">
+                <i class="fas fa-exclamation-circle"></i> No se pudieron cargar los feriados.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    
+    .table-responsive {
+        max-height: 600px;
+        overflow-y: auto;
+    }
+    
+    .table thead {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+    
+    tr[data-tipo] {
+        transition: background-color 0.2s;
+    }
+    
+    tr[data-tipo]:hover {
+        background-color: #f8f9fa !important;
+    }
+</style>
+
+<script>
+function filtrarPorTipo(tipo) {
+    const filas = document.querySelectorAll('#tablaFeriados tbody tr');
+    
+    filas.forEach(fila => {
+        if (tipo === 'todos') {
+            fila.style.display = '';
+        } else if (tipo === 'inalienable') {
+            if (fila.getAttribute('data-inalienable') === 'True') {
+                fila.style.display = '';
+            } else {
+                fila.style.display = 'none';
+            }
+        } else {
+            if (fila.getAttribute('data-tipo') === tipo) {
+                fila.style.display = '';
+            } else {
+                fila.style.display = 'none';
+            }
+        }
+    });
+    
+    // Actualizar botones activos
+    document.querySelectorAll('.btn-outline-primary, .btn-outline-info, .btn-outline-secondary, .btn-outline-warning').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    event.target.classList.add('active');
+}
+</script>
+{% endblock %}
+

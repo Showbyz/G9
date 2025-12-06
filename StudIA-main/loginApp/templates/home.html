@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+<style>
+.messages {
+    list-style-type: none; 
+    padding: 0;
+    margin: 0;
+}
+
+.messages li {
+    margin-bottom: 10px; 
+    padding: 10px;
+    border-radius: 5px; 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+    transition: all 0.3s ease; 
+}
+
+.messages li:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15); 
+}
+
+.messages li.info {
+    background-color: #007BFF; 
+    color: white;
+}
+
+.messages li.success {
+    background-color: #28A745; 
+    color: white;
+}
+
+.messages li.warning {
+    background-color: #FFC107; 
+    color: black; 
+}
+
+.messages li.error {
+    background-color: #DC3545; 
+    color: white;
+}
+</style>
+<link rel="stylesheet" href="{% static 'css/estilosForm.css' %}">
+
+<div class="container-fluid mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-4 bg-dark text-light p-4 rounded">
+            <div class="flex flex-col justify-center items-center space-y-4">
+                <h1 class="text-2xl font-bold text-[#005CFF]">Nueva Solicitud</h1>
+                {% if messages %}
+                    <ul class="messages">
+                        {% for message in messages %}
+                            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+                                {% if message.tags == 'success' %}
+                                    <i class="fas fa-check-circle"></i>
+                                {% elif message.tags == 'error' %}
+                                    <i class="fas fa-times-circle"></i>
+                                {% elif message.tags == 'warning' %}
+                                    <i class="fas fa-exclamation-circle"></i>
+                                {% elif message.tags == 'info' %}
+                                    <i class="fas fa-info-circle"></i>
+                                {% endif %}
+                                {{ message }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                <form id="dynamic-form" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="tipo_sol" class="form-label text-gray-400">Tipo de Solicitud:</label>
+                        <select id="tipo_sol" name="tipo_sol" class="form-select w-100 mb-2 p-2 border border-1">
+                            <option value="">--Seleccione--</option>
+                            {% for form in formularios %}
+                                <option value="{{form.prefix}}"
+                                {% if tipo_form and tipo_form == form.prefix %}
+                                selected
+                                {% endif %}>{{form.prefix}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div id="campos-formulario" class="mb-3">
+                    {% if current_form %}
+                        {% for field in current_form %}
+                            <div class="form-group">
+                                {{ field.label_tag }}
+                                {{ field }}
+                                {% if field.errors %}
+                                    {% for error in field.errors %}
+                                        <div class="alert alert-danger">{{ error }}</div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    </div>
+                    <button class="btn btn-primary w-full mt-4" type="submit">
+                        <i class="fas fa-plus-circle mr-2"></i> Crear Solicitud
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.getElementById('tipo_sol').addEventListener('change', function() {
+        var opcion = this.value;
+        var camposForm = document.getElementById('campos-formulario');
+        // Lógica para mostrar los campos adicionales según la opción seleccionada
+        switch (opcion) {
+            {% for form in formularios %}
+            case "{{form.prefix}}":
+                camposForm.innerHTML = {% spaceless %}'{{form}}'{% endspaceless %};
+                break
+            {% endfor %}
+            default:
+                camposForm.innerHTML = '';
+                break;
+        }
+
+       
+
+    });
+
+    
+</script>
+{% endblock %}
+
+

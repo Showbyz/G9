@@ -1,0 +1,326 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .ayudantia-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+        overflow: hidden;
+    }
+    
+    .ayudantia-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .ayudantia-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+    }
+    
+    .ayudantia-title {
+        font-size: 1.3rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    
+    .ayudantia-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .meta-item {
+        background: rgba(255,255,255,0.2);
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .meta-item i {
+        margin-right: 5px;
+    }
+    
+    .ayudantia-body {
+        padding: 20px;
+    }
+    
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .info-item {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 10px;
+        text-align: center;
+    }
+    
+    .info-label {
+        font-weight: bold;
+        color: #495057;
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .info-label i {
+        margin-right: 8px;
+        color: #667eea;
+    }
+    
+    .info-value {
+        color: #6c757d;
+        font-size: 1.1rem;
+    }
+    
+    .tutor-info {
+        background: #e3f2fd;
+        border-left: 4px solid #2196f3;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    
+    .tutor-name {
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: #1976d2;
+    }
+    
+    .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .stats-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    
+    .stats-label {
+        font-size: 1rem;
+        opacity: 0.9;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+    
+    .btn-create {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        border-radius: 25px;
+        padding: 12px 30px;
+        color: white;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-create:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        color: white;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-chalkboard-teacher"></i> Gestión de Ayudantías</h2>
+                <a href="{% url 'admin_crear_ayudantia' %}" class="btn btn-create">
+                    <i class="fas fa-plus"></i> Crear Ayudantía
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-4 offset-md-4">
+            <div class="stats-card">
+                <div class="stats-number">{{ ayudantias.count }}</div>
+                <div class="stats-label">Total Ayudantías</div>
+            </div>
+        </div>
+    </div>
+    
+    {% if ayudantias %}
+    <div class="row">
+        {% for ayudantia in ayudantias %}
+        <div class="col-md-6 col-lg-4">
+            <div class="ayudantia-card">
+                <div class="ayudantia-header">
+                    <div class="ayudantia-title">{{ ayudantia.titulo }}</div>
+                    <div class="ayudantia-meta">
+                        <div class="meta-item">
+                            <i class="fas fa-book"></i>
+                            {{ ayudantia.asignatura.nombre }}
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-calendar"></i>
+                            {{ ayudantia.fecha|date:"d/m" }}
+                        </div>
+                    </div>
+                </div>
+                <div class="ayudantia-body">
+                    {% if ayudantia.descripcion %}
+                    <div class="descripcion-container" style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #667eea;">
+                        <p class="text-muted mb-0">{{ ayudantia.descripcion|truncatewords:15 }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="fas fa-clock"></i>Horario
+                            </div>
+                            <div class="info-value">{{ ayudantia.horario|time:"H:i" }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="fas fa-door-open"></i>Sala
+                            </div>
+                            <div class="info-value">{{ ayudantia.sala }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="fas fa-hourglass-half"></i>Duración
+                            </div>
+                            <div class="info-value">{{ ayudantia.duracion }} min</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="fas fa-users"></i>Inscripciones
+                            </div>
+                            <div class="info-value">
+                                {{ ayudantia.inscripciones_activas }}/{{ ayudantia.cupos_totales }}
+                                {% if ayudantia.inscripciones_activas > 0 %}
+                                <small class="text-warning">({{ ayudantia.inscripciones_activas }} activas)</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tutor-info">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>Tutor:</strong>
+                                <div class="tutor-name">{{ ayudantia.tutor.nombre_usuario }}</div>
+                            </div>
+                            <div class="text-right">
+                                <small class="text-muted">Cupos: {{ ayudantia.cupos_disponibles }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="fas fa-calendar-plus"></i> Creada: {{ ayudantia.created_at|date:"d/m/Y" }}
+                        </small>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-{% if ayudantia.is_active %}success{% else %}secondary{% endif %}">
+                                {% if ayudantia.is_active %}Activa{% else %}Inactiva{% endif %}
+                            </span>
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'admin_editar_ayudantia' ayudantia.id_ayudantia %}" 
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-edit"></i> Editar
+                                </a>
+                                <a href="{% url 'admin_eliminar_ayudantia' ayudantia.id_ayudantia %}" 
+                                   class="btn btn-sm btn-danger eliminar-ayudantia"
+                                   data-ayudantia-id="{{ ayudantia.id_ayudantia }}"
+                                   data-ayudantia-titulo="{{ ayudantia.titulo }}"
+                                   data-inscripciones-activas="{{ ayudantia.inscripciones_activas }}"
+                                   onclick="return confirmEliminar('{{ ayudantia.titulo }}', {{ ayudantia.inscripciones_activas }})">
+                                    <i class="fas fa-trash"></i> Eliminar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-chalkboard-teacher"></i>
+        <h4>No hay ayudantías creadas</h4>
+        <p>Crea la primera ayudantía para comenzar a gestionar las sesiones de apoyo académico.</p>
+        <a href="{% url 'admin_crear_ayudantia' %}" class="btn btn-create btn-lg mt-3">
+            <i class="fas fa-plus"></i> Crear Primera Ayudantía
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+<script>
+// Función para confirmar eliminación con información sobre inscripciones
+function confirmEliminar(titulo, inscripcionesActivas) {
+    let mensaje = `¿Estás seguro de que quieres eliminar la ayudantía "${titulo}"?`;
+    
+    if (inscripcionesActivas > 0) {
+        mensaje += `\n\n⚠️ ADVERTENCIA: Esta ayudantía tiene ${inscripcionesActivas} estudiante(s) inscrito(s).\nSe cancelarán automáticamente todas las inscripciones.`;
+    }
+    
+    mensaje += '\n\nEsta acción no se puede deshacer.';
+    
+    return confirm(mensaje);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Manejar eliminación de ayudantías
+    const eliminarButtons = document.querySelectorAll('.eliminar-ayudantia');
+    
+    eliminarButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            const ayudantiaId = this.getAttribute('data-ayudantia-id');
+            const ayudantiaTitulo = this.getAttribute('data-ayudantia-titulo');
+            const inscripcionesActivas = parseInt(this.getAttribute('data-inscripciones-activas'));
+            
+            // La confirmación se maneja en la función confirmEliminar
+            // Mostrar indicador de carga
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Eliminando...';
+            this.disabled = true;
+        });
+    });
+    
+    // Verificar si hay mensajes de éxito para recargar la página
+    const successMessages = document.querySelectorAll('.alert-success');
+    if (successMessages.length > 0) {
+        setTimeout(() => {
+            window.location.reload();
+        }, 1500);
+    }
+});
+</script>

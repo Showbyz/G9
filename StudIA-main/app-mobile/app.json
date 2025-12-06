@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "Portal de Ayudantías",
+    "slug": "portal-ayudantias",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#007bff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.portalyudantias.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#007bff"
+      },
+      "package": "com.portalyudantias.app"
+    },
+    "web": {
+      "favicon": "./assets/icon.png"
+    }
+  }
+}
+

@@ -1,0 +1,374 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .asignatura-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .asignatura-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    }
+    
+    .asignatura-header {
+        padding: 20px;
+        border-radius: 15px 15px 0 0;
+    }
+    
+    .asignatura-body {
+        padding: 20px;
+        background: white;
+        color: #333;
+        border-radius: 0 0 15px 15px;
+    }
+    
+    .asignatura-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    
+    .asignatura-code {
+        background: rgba(255,255,255,0.2);
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        display: inline-block;
+        margin-bottom: 10px;
+    }
+    
+    .asignatura-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 15px;
+    }
+    
+    .ayudantias-count {
+        background: #28a745;
+        color: white;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 0.9rem;
+    }
+    
+    .btn-ver-ayudantias {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 25px;
+        padding: 10px 25px;
+        color: white;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-ver-ayudantias:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        color: white;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+    
+    .filter-container {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .filter-label {
+        font-weight: bold;
+        color: #495057;
+        margin-bottom: 10px;
+        font-size: 1.1rem;
+    }
+    
+    .filter-select {
+        width: 100%;
+        padding: 12px 15px;
+        border-radius: 10px;
+        border: 2px solid #667eea;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+    
+    .filter-select:focus {
+        outline: none;
+        border-color: #764ba2;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    
+    .selected-asignatura-container {
+        animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .no-selection {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .no-selection i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-book"></i> Asignaturas Disponibles</h2>
+                <a href="{% url 'estudiante_mis_ayudantias' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-calendar-check"></i> Mis Ayudantías
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Script debe estar antes del select para que la función esté disponible -->
+    <script>
+    // Función para mostrar la asignatura seleccionada
+    function mostrarAsignatura(asignaturaId) {
+        if (asignaturaId) {
+            // Redirigir a la misma página con el parámetro de asignatura seleccionada
+            const url = new URL(window.location.href);
+            url.searchParams.set('asignatura_id', asignaturaId);
+            window.location.href = url.toString();
+        } else {
+            // Si no hay selección, redirigir sin parámetros
+            const url = new URL(window.location.href);
+            url.searchParams.delete('asignatura_id');
+            window.location.href = url.toString();
+        }
+    }
+    </script>
+    
+    <!-- Filtro desplegable para seleccionar asignatura -->
+    {% if asignaturas %}
+    <div class="filter-container">
+        <label class="filter-label" for="asignatura-filter">
+            <i class="fas fa-filter"></i> Seleccionar Asignatura
+        </label>
+        <select id="asignatura-filter" class="filter-select" onchange="mostrarAsignatura(this.value)">
+            <option value="">-- Seleccione una asignatura --</option>
+            {% for asignatura in asignaturas %}
+            <option value="{{ asignatura.id_asignatura }}" {% if asignatura_seleccionada and asignatura_seleccionada.id_asignatura == asignatura.id_asignatura %}selected{% endif %}>
+                {{ asignatura.codigo }} - {{ asignatura.nombre }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    <!-- Tarjeta de asignatura seleccionada -->
+    {% if asignatura_seleccionada %}
+    <div class="selected-asignatura-container">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="asignatura-card">
+                    <div class="asignatura-header">
+                        <div class="asignatura-code">{{ asignatura_seleccionada.codigo }}</div>
+                        <div class="asignatura-title">{{ asignatura_seleccionada.nombre }}</div>
+                        <div class="asignatura-info">
+                            <div>
+                                <small><i class="fas fa-graduation-cap"></i> {{ asignatura_seleccionada.carrera }}</small>
+                            </div>
+                            <div class="ayudantias-count">
+                                <i class="fas fa-chalkboard-teacher"></i> {{ asignatura_seleccionada.ayudantias.count }} Ayudantías
+                            </div>
+                        </div>
+                    </div>
+                    <div class="asignatura-body">
+                        {% if asignatura_seleccionada.descripcion %}
+                        <p class="text-muted mb-3">{{ asignatura_seleccionada.descripcion }}</p>
+                        {% else %}
+                        <p class="text-muted mb-3"><em>Sin descripción disponible.</em></p>
+                        {% endif %}
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                <i class="fas fa-clock"></i> Creada: {{ asignatura_seleccionada.created_at|date:"d/m/Y" }}
+                            </small>
+                            <a href="{% url 'estudiante_ayudantias_asignatura' asignatura_seleccionada.id_asignatura %}" 
+                               class="btn btn-ver-ayudantias"
+                               data-asignatura-id="{{ asignatura_seleccionada.id_asignatura }}"
+                               data-asignatura-nombre="{{ asignatura_seleccionada.nombre }}"
+                               data-ayudantias-count="{{ asignatura_seleccionada.ayudantias.count }}"
+                               onclick="return verificarAyudantias(this)">
+                                <i class="fas fa-eye"></i> Ver Ayudantías
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+        <!-- Mensaje cuando no hay asignatura seleccionada pero hay asignaturas disponibles -->
+        <div class="no-selection">
+            <i class="fas fa-hand-pointer"></i>
+            <h4>Seleccione una asignatura</h4>
+            <p>Use el filtro de arriba para seleccionar una asignatura y ver sus detalles.</p>
+            {% if asignatura_seleccionada_id %}
+            <p class="text-danger"><small>No se encontró la asignatura con ID: {{ asignatura_seleccionada_id }}</small></p>
+            {% endif %}
+        </div>
+    {% endif %}
+    {% else %}
+    <!-- Mensaje cuando no hay asignaturas -->
+    <div class="empty-state">
+        <i class="fas fa-book-open"></i>
+        <h4>No hay asignaturas disponibles</h4>
+        <p>Las asignaturas aparecerán aquí cuando los administradores las creen.</p>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+// Función para verificar si hay ayudantías disponibles
+function verificarAyudantias(element) {
+    const asignaturaId = element.getAttribute('data-asignatura-id');
+    const asignaturaNombre = element.getAttribute('data-asignatura-nombre');
+    const ayudantiasCount = parseInt(element.getAttribute('data-ayudantias-count'));
+    
+    // Verificar primero si el contador es 0
+    if (ayudantiasCount === 0) {
+        mostrarPopupSinAyudantias(asignaturaNombre);
+        return false; // Prevenir la navegación
+    }
+    
+    // Si hay ayudantías, hacer verificación adicional con AJAX
+    fetch(`/estudiante/asignatura/${asignaturaId}/`)
+        .then(response => response.text())
+        .then(html => {
+            // Verificar si la respuesta contiene ayudantías con cupos disponibles
+            if (html.includes('No hay ayudantías disponibles') || 
+                html.includes('empty-state') ||
+                (html.includes('Ayudantías Sin Cupos') && !html.includes('Ayudantías Disponibles'))) {
+                
+                // Mostrar popup si no hay ayudantías con cupos
+                mostrarPopupSinAyudantias(asignaturaNombre);
+                return false; // Prevenir la navegación
+            } else {
+                // Si hay ayudantías con cupos, permitir la navegación normal
+                window.location.href = element.href;
+                return true;
+            }
+        })
+        .catch(error => {
+            console.error('Error al verificar ayudantías:', error);
+            // En caso de error, permitir la navegación normal
+            window.location.href = element.href;
+            return true;
+        });
+    
+    return false; // Prevenir navegación inmediata
+}
+
+// Función para mostrar el popup
+function mostrarPopupSinAyudantias(asignaturaNombre) {
+    // Crear el modal dinámicamente
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.id = 'modalSinAyudantias';
+    modal.setAttribute('tabindex', '-1');
+    modal.setAttribute('aria-labelledby', 'modalSinAyudantiasLabel');
+    modal.setAttribute('aria-hidden', 'true');
+    
+    modal.innerHTML = `
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title" id="modalSinAyudantiasLabel">
+                        <i class="fas fa-exclamation-triangle"></i> Sin Ayudantías Disponibles
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-chalkboard-teacher fa-3x text-warning"></i>
+                    </div>
+                    <h6>No hay ayudantías disponibles para:</h6>
+                    <p class="fw-bold text-primary">${asignaturaNombre}</p>
+                    <p class="text-muted">Los tutores aún no han creado ayudantías para esta asignatura.</p>
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-info-circle"></i>
+                        <small>Cuando los tutores creen ayudantías para esta asignatura, aparecerán aquí.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Agregar el modal al body
+    document.body.appendChild(modal);
+    
+    // Mostrar el modal
+    const bootstrapModal = new bootstrap.Modal(modal);
+    bootstrapModal.show();
+    
+    // Limpiar el modal cuando se cierre
+    modal.addEventListener('hidden.bs.modal', function() {
+        document.body.removeChild(modal);
+    });
+}
+
+// Mantener el valor seleccionado después de recargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    const select = document.getElementById('asignatura-filter');
+    if (select) {
+        // El valor ya está establecido en el template con el atributo 'selected'
+        // No necesitamos hacer nada adicional
+    }
+    
+    // Verificar si Bootstrap está disponible
+    if (typeof bootstrap === 'undefined') {
+        console.warn('Bootstrap no está disponible. El popup puede no funcionar correctamente.');
+    }
+});
+</script>
+
+{% endblock %}

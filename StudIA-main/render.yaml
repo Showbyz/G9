@@ -1,0 +1,51 @@
+services:
+  - type: web
+    name: portal-autoatencion
+    env: python
+    runtime: python-3.11.1
+    buildCommand: pip install --upgrade pip setuptools wheel && pip install -r requirements.txt && python manage.py collectstatic --noinput --skip-checks
+    startCommand: gunicorn portalAutoatencion.wsgi:application --bind 0.0.0.0:$PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: portal-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "True"  # Temporalmente True para debugging
+      - key: ALLOWED_HOSTS
+        value: studia-8dmp.onrender.com,*.onrender.com
+      - key: CSRF_TRUSTED_ORIGINS
+        value: https://studia-8dmp.onrender.com
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://studia-8dmp.onrender.com,https://*.onrender.com
+      - key: DB_NAME
+        fromDatabase:
+          name: portal-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: portal-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: portal-db
+          property: password
+      - key: DB_HOST
+        fromDatabase:
+          name: portal-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: portal-db
+          property: port
+      - key: PYTHON_VERSION
+        value: "3.11.1"
+
+databases:
+  - name: portal-db
+    databaseName: portal
+    user: portal_user
+    plan: free
+

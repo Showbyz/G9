@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 15px;
+        padding: 20px;
+        color: white;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .stats-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    
+    .stats-label {
+        font-size: 1rem;
+        opacity: 0.9;
+    }
+    
+    .solicitud-item {
+        background: #f8f9fa;
+        border-left: 4px solid #007bff;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+    }
+    
+    .solicitud-item:hover {
+        background: #e9ecef;
+        transform: translateX(5px);
+    }
+    
+    .estado-badge {
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    
+    .estado-pendiente {
+        background-color: #ffc107;
+        color: #000;
+    }
+    
+    .estado-proceso {
+        background-color: #17a2b8;
+        color: white;
+    }
+    
+    .estado-completo {
+        background-color: #28a745;
+        color: white;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="text-center mb-4">
+                <i class="fas fa-chalkboard-teacher"></i> Panel de Tutor
+            </h2>
+        </div>
+    </div>
+    
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stats-card text-center">
+                <div class="stats-number">{{ total_solicitudes }}</div>
+                <div class="stats-label">Total Solicitudes</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card text-center" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <div class="stats-number">{{ solicitudes_proceso }}</div>
+                <div class="stats-label">En Proceso</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card text-center" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <div class="stats-number">{{ solicitudes_completas }}</div>
+                <div class="stats-label">Completadas</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card text-center" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                <div class="stats-number">{{ solicitudes|length }}</div>
+                <div class="stats-label">Pendientes</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Acciones rápidas -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-bolt"></i> Acciones Rápidas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <a href="{% url 'tutor_solicitudes' %}" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="fas fa-list"></i><br>
+                                Ver Todas las Solicitudes
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="{% url 'home' %}" class="btn btn-outline-success btn-lg w-100">
+                                <i class="fas fa-plus"></i><br>
+                                Crear Nueva Solicitud
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="{% url 'logout' %}" class="btn btn-outline-danger btn-lg w-100">
+                                <i class="fas fa-sign-out-alt"></i><br>
+                                Cerrar Sesión
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Últimas solicitudes -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-clock"></i> Últimas Solicitudes</h5>
+                </div>
+                <div class="card-body">
+                    {% if solicitudes %}
+                        {% for solicitud in solicitudes %}
+                        <div class="solicitud-item">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <h6 class="mb-1">{{ solicitud.tipo_sol }}</h6>
+                                    <small class="text-muted">
+                                        <i class="fas fa-user"></i> {{ solicitud.id_usuario.nombre_usuario }} | 
+                                        <i class="fas fa-calendar"></i> {{ solicitud.created_at|date:"d/m/Y H:i" }}
+                                    </small>
+                                </div>
+                                <div class="col-md-3">
+                                    <span class="estado-badge estado-{{ solicitud.estado_sol|lower|cut:' ' }}">
+                                        {{ solicitud.estado_sol }}
+                                    </span>
+                                </div>
+                                <div class="col-md-3 text-right">
+                                    <a href="{% url 'tutor_ver_solicitud' solicitud.id_sol %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i> Ver Detalles
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No hay solicitudes pendientes</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

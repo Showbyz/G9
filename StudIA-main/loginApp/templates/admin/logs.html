@@ -1,0 +1,318 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .logs-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .logs-title {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+    
+    .filter-section {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .log-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .log-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    }
+    
+    .log-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .log-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #495057;
+    }
+    
+    .log-meta {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+    
+    .meta-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .stat-item {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 15px;
+        text-align: center;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-bottom: 5px;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #495057;
+    }
+    
+    .stat-value.asistieron {
+        color: #28a745;
+    }
+    
+    .stat-value.no-asistieron {
+        color: #dc3545;
+    }
+    
+    .estudiantes-table {
+        width: 100%;
+        margin-top: 20px;
+    }
+    
+    .estudiantes-table th {
+        background: #f8f9fa;
+        padding: 12px;
+        text-align: left;
+        font-weight: bold;
+        color: #495057;
+        border-bottom: 2px solid #dee2e6;
+    }
+    
+    .estudiantes-table td {
+        padding: 12px;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .estudiantes-table tr:hover {
+        background: #f8f9fa;
+    }
+    
+    .badge-asistio {
+        background-color: #28a745;
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+    }
+    
+    .badge-no-asistio {
+        background-color: #dc3545;
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+    }
+    
+    .btn-exportar {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        border-radius: 25px;
+        padding: 12px 30px;
+        color: white;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-exportar:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        color: white;
+    }
+    
+    .empty-logs {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+    }
+    
+    .empty-logs i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <!-- Header -->
+    <div class="logs-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <div class="logs-title">
+                    <i class="fas fa-file-alt"></i> Logs de Ayudantías Cursadas
+                </div>
+                <p class="mb-0">Registro histórico de todas las ayudantías cursadas en el sistema</p>
+            </div>
+            <div>
+                <a href="{% url 'admin_exportar_logs_excel' %}{% if fecha_inicio %}?fecha_inicio={{ fecha_inicio }}{% endif %}{% if fecha_fin %}{% if fecha_inicio %}&{% else %}?{% endif %}fecha_fin={{ fecha_fin }}{% endif %}" class="btn btn-exportar">
+                    <i class="fas fa-file-excel"></i> Exportar a Excel
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Filtros -->
+    <div class="filter-section">
+        <h4><i class="fas fa-filter"></i> Filtros</h4>
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="fecha_inicio" class="form-label">Fecha de Inicio</label>
+                <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" value="{{ fecha_inicio }}">
+            </div>
+            <div class="col-md-4">
+                <label for="fecha_fin" class="form-label">Fecha de Fin</label>
+                <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" value="{{ fecha_fin }}">
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="fas fa-search"></i> Filtrar
+                </button>
+                <a href="{% url 'admin_logs' %}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Limpiar
+                </a>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Mensajes -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+    
+    <!-- Lista de ayudantías cursadas -->
+    {% if ayudantias_cursadas %}
+    <div class="logs-list">
+        {% for ayudantia in ayudantias_cursadas %}
+        <div class="log-card">
+            <div class="log-header">
+                <div>
+                    <div class="log-title">{{ ayudantia.titulo }}</div>
+                    <small class="text-muted">{{ ayudantia.asignatura.nombre }} - Tutor: {{ ayudantia.tutor.nombre_usuario }}</small>
+                </div>
+                <div class="log-meta">
+                    <span class="meta-badge">
+                        <i class="fas fa-calendar"></i> {{ ayudantia.fecha|date:"d/m/Y" }}
+                    </span>
+                    <span class="meta-badge">
+                        <i class="fas fa-clock"></i> {{ ayudantia.horario|time:"H:i" }}
+                    </span>
+                    <span class="meta-badge">
+                        <i class="fas fa-check-circle"></i> Cursada: {{ ayudantia.fecha_cursada|date:"d/m/Y H:i" }}
+                    </span>
+                </div>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-label">Total Inscritos</div>
+                    <div class="stat-value">{{ ayudantia.total_inscritos }}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Asistieron</div>
+                    <div class="stat-value asistieron">{{ ayudantia.total_asistieron }}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">No Asistieron</div>
+                    <div class="stat-value no-asistieron">{{ ayudantia.total_no_asistieron }}</div>
+                </div>
+            </div>
+            
+            <div class="mt-3">
+                <h6><i class="fas fa-users"></i> Detalle de Asistencia</h6>
+                <table class="estudiantes-table">
+                    <thead>
+                        <tr>
+                            <th>Estudiante</th>
+                            <th>Email</th>
+                            <th>Asistencia</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if ayudantia.total_inscritos > 0 %}
+                        {% for inscripcion in ayudantia.inscripciones.all %}
+                        {% if inscripcion.estado == 'activa' %}
+                        <tr>
+                            <td>{{ inscripcion.estudiante.nombre_usuario }}</td>
+                            <td>{{ inscripcion.estudiante.email }}</td>
+                            <td>
+                                {% if inscripcion.asistio %}
+                                <span class="badge-asistio">
+                                    <i class="fas fa-check"></i> Asistió
+                                </span>
+                                {% elif inscripcion.asistio == False %}
+                                <span class="badge-no-asistio">
+                                    <i class="fas fa-times"></i> No Asistió
+                                </span>
+                                {% else %}
+                                <span class="badge bg-secondary">
+                                    <i class="fas fa-question"></i> Sin Registrar
+                                </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="3" class="text-center text-muted">No hay estudiantes inscritos</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-logs">
+        <i class="fas fa-file-alt"></i>
+        <h4>No hay ayudantías cursadas</h4>
+        <p>Las ayudantías cursadas aparecerán aquí con el registro de asistencia.</p>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}
+

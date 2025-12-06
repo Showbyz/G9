@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .update-form {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .solicitud-info {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-left: 4px solid #007bff;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-label {
+        font-weight: bold;
+        color: #495057;
+        margin-bottom: 8px;
+    }
+    
+    .form-control, .form-select {
+        border-radius: 8px;
+        border: 1px solid #ced4da;
+        padding: 12px;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    }
+    
+    .estado-option {
+        padding: 10px;
+        margin: 5px 0;
+        border-radius: 5px;
+        border: 1px solid #dee2e6;
+        background: white;
+        transition: all 0.3s ease;
+    }
+    
+    .estado-option:hover {
+        background: #f8f9fa;
+        border-color: #007bff;
+    }
+    
+    .estado-option input[type="radio"] {
+        margin-right: 10px;
+    }
+    
+    .btn-update {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 25px;
+        padding: 12px 30px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-update:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="update-form">
+                <h3 class="text-center mb-4">
+                    <i class="fas fa-edit"></i> Actualizar Estado de Solicitud
+                </h3>
+                
+                <!-- Información de la solicitud -->
+                <div class="solicitud-info">
+                    <h5><i class="fas fa-file-alt"></i> {{ solicitud.tipo_sol }}</h5>
+                    <p class="mb-1"><strong>Usuario:</strong> {{ solicitud.id_usuario.nombre_usuario }}</p>
+                    <p class="mb-1"><strong>Email:</strong> {{ solicitud.id_usuario.email }}</p>
+                    <p class="mb-0"><strong>Fecha:</strong> {{ solicitud.created_at|date:"d/m/Y H:i" }}</p>
+                </div>
+                
+                <!-- Formulario de actualización -->
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label class="form-label">Estado Actual</label>
+                        <div class="form-control" style="background-color: #e9ecef;">
+                            <span class="badge bg-{% if solicitud.estado_sol == 'Pendiente' %}warning{% elif solicitud.estado_sol == 'En Proceso' %}info{% else %}success{% endif %} fs-6">
+                                {{ solicitud.estado_sol }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Nuevo Estado</label>
+                        <div class="estado-options">
+                            {% for estado in estados_posibles %}
+                            <div class="estado-option">
+                                <input type="radio" name="estado_sol" value="{{ estado }}" id="estado_{{ forloop.counter }}" 
+                                       {% if estado == solicitud.estado_sol %}checked{% endif %}>
+                                <label for="estado_{{ forloop.counter }}" class="form-check-label">
+                                    <strong>{{ estado }}</strong>
+                                    {% if estado == 'Pendiente' %}
+                                        <br><small class="text-muted">La solicitud está esperando ser procesada</small>
+                                    {% elif estado == 'En Proceso' %}
+                                        <br><small class="text-muted">La solicitud está siendo procesada</small>
+                                    {% elif estado == 'Completo' %}
+                                        <br><small class="text-muted">La solicitud ha sido completada</small>
+                                    {% endif %}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="observaciones" class="form-label">Observaciones (Opcional)</label>
+                        <textarea name="observaciones" id="observaciones" class="form-control" rows="4" 
+                                  placeholder="Agregue cualquier observación o comentario sobre el estado de la solicitud..."></textarea>
+                    </div>
+                    
+                    <!-- Mensajes de error -->
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-update text-white">
+                            <i class="fas fa-save"></i> Actualizar Estado
+                        </button>
+                        <a href="{% url 'tutor_ver_solicitud' solicitud.id_sol %}" class="btn btn-outline-secondary ms-3">
+                            <i class="fas fa-arrow-left"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Agregar efectos visuales a las opciones de estado
+    const estadoOptions = document.querySelectorAll('.estado-option');
+    
+    estadoOptions.forEach(option => {
+        const radio = option.querySelector('input[type="radio"]');
+        const label = option.querySelector('label');
+        
+        option.addEventListener('click', function() {
+            // Remover selección de otras opciones
+            estadoOptions.forEach(opt => {
+                opt.style.backgroundColor = 'white';
+                opt.style.borderColor = '#dee2e6';
+            });
+            
+            // Seleccionar esta opción
+            radio.checked = true;
+            option.style.backgroundColor = '#e3f2fd';
+            option.style.borderColor = '#007bff';
+        });
+        
+        // Efecto hover
+        option.addEventListener('mouseenter', function() {
+            if (!radio.checked) {
+                option.style.backgroundColor = '#f8f9fa';
+            }
+        });
+        
+        option.addEventListener('mouseleave', function() {
+            if (!radio.checked) {
+                option.style.backgroundColor = 'white';
+            }
+        });
+    });
+});
+</script>
+
+{% endblock %}

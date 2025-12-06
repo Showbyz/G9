@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-3 bg-dark text-light p-4 rounded">
+            <div class="flex flex-col justify-center items-center space-y-4">
+                <h1 class="text-2xl font-bold text-[#005CFF]">Casos de Uso</h1>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ formulario.as_p }}
+                    <button class="btn btn-primary w-full mt-4" type="submit">
+                        <i class="fas fa-save mr-2"></i> Guardar Cambios
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

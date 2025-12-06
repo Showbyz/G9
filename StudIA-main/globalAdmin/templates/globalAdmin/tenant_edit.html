@@ -1,0 +1,89 @@
+{% extends "globalAdmin/base.html" %}
+{% load static %}
+
+{% block title %}Editar Tenant{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Editar Tenant: {{ tenant.nombre_empresa }}</h3>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="nombre_empresa" class="form-label">Nombre de la Empresa *</label>
+                            <input type="text" class="form-control" id="nombre_empresa" name="nombre_empresa" value="{{ tenant.nombre_empresa }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="nombre_sn" class="form-label">Nombre ServiceNow</label>
+                            <input type="text" class="form-control" id="nombre_sn" name="nombre_sn" value="{{ tenant.nombre_sn }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="tema" class="form-label">Tema</label>
+                            <select class="form-control" id="tema" name="tema">
+                                <option value="default" {% if tenant.tema == 'default' %}selected{% endif %}>Default</option>
+                                <option value="tema1" {% if tenant.tema == 'tema1' %}selected{% endif %}>Tema 1</option>
+                                <option value="tema2" {% if tenant.tema == 'tema2' %}selected{% endif %}>Tema 2</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="estado" class="form-label">Estado</label>
+                            <select class="form-control" id="estado" name="estado">
+                                <option value="A" {% if tenant.estado == 'A' %}selected{% endif %}>Activo</option>
+                                <option value="I" {% if tenant.estado == 'I' %}selected{% endif %}>Inactivo</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="dominio_principal" class="form-label">Dominio Principal</label>
+                            {% for dominio in dominios %}
+                                {% if dominio.is_primary %}
+                                    <input type="text" class="form-control" id="dominio_principal" name="dominio_principal" value="{{ dominio.domain }}" placeholder="ej: inacap.localhost">
+                                {% endif %}
+                            {% empty %}
+                                <input type="text" class="form-control" id="dominio_principal" name="dominio_principal" placeholder="ej: inacap.localhost">
+                            {% endfor %}
+                            <small class="form-text text-muted">Los dominios se normalizan automáticamente a minúsculas.</small>
+                        </div>
+                        
+                        {% if dominios|length > 1 %}
+                        <div class="mb-3">
+                            <label class="form-label">Otros Dominios</label>
+                            <ul class="list-group">
+                                {% for dominio in dominios %}
+                                    {% if not dominio.is_primary %}
+                                    <li class="list-group-item">{{ dominio.domain }}</li>
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'global_admin:tenant_list' %}" class="btn btn-secondary">Cancelar</a>
+                            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-4 bg-dark text-light p-4 rounded">
+            <div class="flex flex-col justify-center items-center space-y-4">
+                <h1 class="text-4xl font-bold text-[#005CFF] mb-6">Reportería</h1>
+                <hr class="w-16 border-t border-[#005CFF] mb-6">
+                <form method="post" class="formulario-container">
+                    {% csrf_token %}
+                    {% for campo in formulario %}
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-400" for="{{campo.id_for_label}}">
+                            {{campo.label}}
+                        </label>
+                        {{campo}}
+                    </div>
+                    {% endfor %}
+                    <div class="flex justify-center items-center space-x-2"> 
+                        <button class="btn btn-primary flex items-center" type="submit">
+                            <i class="fas fa-download mr-2"></i> 
+                            Extraer Reporte
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

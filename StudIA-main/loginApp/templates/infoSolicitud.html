@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg bg-dark text-white">
+                <div class="card-header bg-dark pt-4 pb-2">
+                    <h2 class="card-title text-white mt-2 mb-3">Detalle de Solicitud</h2>
+                    <hr class="border-white mb-4">
+                </div>
+                <div class="container">
+                    {% if form %}
+                    <form>
+                        {% for field in form %}
+                        <div class="mb-3">
+                            <label class="form-label text-white">{{ field.label }}</label>
+                            {% if field.name == "adjunto" %}
+                                {% if field.value %}
+                                <div class="p-2 bg-white text-dark rounded">
+                                    Archivo adjunto presente: {{ field.value.name }}
+                                </div>
+                                {% else %}
+                                <p class="form-control-plaintext text-white">No hay archivo adjunto</p>
+                                {% endif %}
+                            {% else %}
+                                <div class="p-2 bg-white text-dark rounded">{{ field.value }}</div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </form>
+                    {% else %}
+                    <p>Formulario no disponible.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

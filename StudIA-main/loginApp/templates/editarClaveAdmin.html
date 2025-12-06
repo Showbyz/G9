@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .messages {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+        width: 100%; 
+        text-align: center;
+    }
+
+    .messages li {
+        margin-bottom: 10px;
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+
+    .messages li:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    .messages li.info {
+        background-color: #007BFF;
+        color: white;
+    }
+
+    .messages li.success {
+        background-color: #28A745;
+        color: white;
+    }
+
+    .messages li.warning {
+        background-color: #FFC107;
+        color: black;
+    }
+
+    .messages li.error {
+        background-color: #DC3545;
+        color: white;
+    }
+
+    .message-icon {
+        margin-right: 5px; 
+    }
+</style>
+<div class="container-fluid mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-4 bg-dark text-light p-4 rounded">
+            <h3 class="text-center mb-4">Editar Contraseña</h3>
+            
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                <li class="{{ message.tags }}">
+                    <span class="message-icon">
+                        {% if message.tags == 'success' %}
+                            <i class="fas fa-check-circle"></i>
+                        {% elif message.tags == 'error' %}
+                            <i class="fas fa-exclamation-circle"></i>
+                        {% elif message.tags == 'warning' %}
+                            <i class="fas fa-exclamation-triangle"></i>
+                        {% elif message.tags == 'info' %}
+                            <i class="fas fa-info-circle"></i>
+                        {% endif %}
+                    </span>
+                    {{ message }}
+                </li>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <form id="cambiarContraseñaForm" method="post">
+                {% csrf_token %}
+                {% for campo in formulario %}
+                <div class="form-group mb-3">
+                    <label for="{{ campo.id_for_label }}" class="form-label">{{ campo.label }}</label>
+                    <div>
+                        {{ campo }}
+                        {% if campo.errors %}
+                        <ul class="error-messages">
+                            {% for error in campo.errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary">
+                        Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

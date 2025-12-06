@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .asistencia-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .asistencia-title {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+    
+    .estudiante-checkbox-item {
+        background: white;
+        border: 2px solid #dee2e6;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.3s ease;
+    }
+    
+    .estudiante-checkbox-item:hover {
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+        border-color: #667eea;
+    }
+    
+    .estudiante-checkbox-item input[type="checkbox"] {
+        width: 25px;
+        height: 25px;
+        cursor: pointer;
+    }
+    
+    .estudiante-info-checkbox {
+        display: flex;
+        align-items: center;
+        flex: 1;
+    }
+    
+    .estudiante-avatar-checkbox {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 1.2rem;
+        margin-right: 20px;
+    }
+    
+    .estudiante-details-checkbox h6 {
+        margin: 0;
+        color: #495057;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+    
+    .estudiante-details-checkbox small {
+        color: #6c757d;
+    }
+    
+    .btn-registrar {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        border-radius: 25px;
+        padding: 15px 40px;
+        color: white;
+        font-weight: bold;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-registrar:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        color: white;
+    }
+    
+    .btn-cancelar {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        border: none;
+        border-radius: 25px;
+        padding: 15px 40px;
+        color: white;
+        font-weight: bold;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-cancelar:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+        color: white;
+    }
+    
+    .info-section {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 25px;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <!-- Header -->
+    <div class="asistencia-header">
+        <div class="asistencia-title">
+            <i class="fas fa-check-square"></i> Registrar Asistencia
+        </div>
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <p class="mb-0"><strong>{{ ayudantia.titulo }}</strong></p>
+                <p class="mb-0">{{ ayudantia.asignatura.nombre }}</p>
+                <p class="mb-0">{{ ayudantia.fecha|date:"d/m/Y" }} - {{ ayudantia.horario|time:"H:i" }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Mensajes -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+    
+    <!-- Formulario de asistencia -->
+    {% if inscripciones %}
+    <div class="info-section">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4><i class="fas fa-users"></i> Estudiantes Inscritos ({{ inscripciones.count }})</h4>
+            <small class="text-muted">Selecciona los estudiantes que asistieron a la ayudantía</small>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="estudiantes-checkbox-list">
+                {% for inscripcion in inscripciones %}
+                <div class="estudiante-checkbox-item">
+                    <div class="estudiante-info-checkbox">
+                        <div class="estudiante-avatar-checkbox">
+                            {{ inscripcion.estudiante.nombre_usuario|first|upper }}
+                        </div>
+                        <div class="estudiante-details-checkbox">
+                            <h6>{{ inscripcion.estudiante.nombre_usuario }}</h6>
+                            <small>{{ inscripcion.estudiante.email }}</small>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="form-check-label" for="asistencia_{{ inscripcion.id_inscripcion }}">
+                            <input type="checkbox" 
+                                   name="asistencia" 
+                                   value="{{ inscripcion.id_inscripcion }}" 
+                                   id="asistencia_{{ inscripcion.id_inscripcion }}"
+                                   {% if inscripcion.asistio %}checked{% endif %}
+                                   class="form-check-input">
+                            <span class="ms-2">Asistió</span>
+                        </label>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{% url 'tutor_detalle_ayudantia' ayudantia.id_ayudantia %}" class="btn btn-cancelar">
+                    <i class="fas fa-times"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-registrar">
+                    <i class="fas fa-save"></i> Guardar Asistencia
+                </button>
+            </div>
+        </form>
+    </div>
+    {% else %}
+    <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle"></i>
+        <strong>No hay estudiantes inscritos</strong>
+        <p>No puedes registrar asistencia porque no hay estudiantes inscritos en esta ayudantía.</p>
+    </div>
+    {% endif %}
+    
+    <!-- Botón de regreso -->
+    <div class="text-center mt-4">
+        <a href="{% url 'tutor_detalle_ayudantia' ayudantia.id_ayudantia %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Volver a Detalle de Ayudantía
+        </a>
+    </div>
+</div>
+
+{% endblock %}
+
+

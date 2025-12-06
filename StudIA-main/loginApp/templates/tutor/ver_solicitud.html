@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .solicitud-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .solicitud-details {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .form-field {
+        margin-bottom: 15px;
+    }
+    
+    .form-label {
+        font-weight: bold;
+        color: #495057;
+        margin-bottom: 5px;
+    }
+    
+    .form-value {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        padding: 10px;
+        min-height: 40px;
+    }
+    
+    .estado-badge {
+        padding: 10px 20px;
+        border-radius: 25px;
+        font-size: 1rem;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+    
+    .estado-pendiente {
+        background-color: #ffc107;
+        color: #000;
+    }
+    
+    .estado-en-proceso {
+        background-color: #17a2b8;
+        color: white;
+    }
+    
+    .estado-completo {
+        background-color: #28a745;
+        color: white;
+    }
+    
+    .action-buttons {
+        margin-top: 20px;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <!-- Header de la solicitud -->
+    <div class="solicitud-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h3><i class="fas fa-file-alt"></i> {{ solicitud.tipo_sol }}</h3>
+                <p class="mb-0">
+                    <i class="fas fa-user"></i> {{ solicitud.id_usuario.nombre_usuario }} | 
+                    <i class="fas fa-calendar"></i> {{ solicitud.created_at|date:"d/m/Y H:i" }}
+                </p>
+            </div>
+            <div class="col-md-4 text-right">
+                <span class="estado-badge estado-{{ solicitud.estado_sol|lower|cut:' ' }}">
+                    {{ solicitud.estado_sol }}
+                </span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Detalles del formulario -->
+    <div class="solicitud-details">
+        <h5 class="mb-3"><i class="fas fa-info-circle"></i> Detalles de la Solicitud</h5>
+        
+        {% if form %}
+            {% for field in form %}
+            <div class="form-field">
+                <div class="form-label">{{ field.label }}</div>
+                <div class="form-value">
+                    {% if field.field.widget.input_type == 'file' and field.value %}
+                        <a href="{{ field.value.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-download"></i> Descargar Archivo
+                        </a>
+                    {% else %}
+                        {{ field.value|default:"No especificado" }}
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i> No se pudo cargar la información del formulario.
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Información del usuario -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-user"></i> Información del Usuario</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Nombre:</strong> {{ solicitud.id_usuario.nombre_usuario }}</p>
+                    <p><strong>Email:</strong> {{ solicitud.id_usuario.email }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Teléfono:</strong> {{ solicitud.id_usuario.telefono }}</p>
+                    <p><strong>Cargo:</strong> {{ solicitud.id_usuario.cargo }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Botones de acción -->
+    <div class="action-buttons">
+        <div class="row">
+            <div class="col-md-6">
+                <a href="{% url 'tutor_solicitudes' %}" class="btn btn-outline-secondary btn-lg w-100">
+                    <i class="fas fa-arrow-left"></i> Volver a la Lista
+                </a>
+            </div>
+            <div class="col-md-6">
+                <a href="{% url 'tutor_actualizar_solicitud' solicitud.id_sol %}" class="btn btn-primary btn-lg w-100">
+                    <i class="fas fa-edit"></i> Actualizar Estado
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

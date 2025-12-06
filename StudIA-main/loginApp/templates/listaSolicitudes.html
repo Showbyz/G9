@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-5 pb-20 md:pb-10 min-vh-100 d-flex flex-column justify-content-center">
+    <div class="row justify-content-center pt-6 pb-20">
+        <div class="col-md-8 col-lg-11">
+            <div class="bg-dark text-white p-4 rounded">
+                    <h1 class="text-2xl font-bold text-[#005CFF]">Estado de Solicitudes Empresa - {{ request.tenant.nombre_empresa }}</h1>
+                    <hr class="bg-[#005CFF] my-2">
+                    <div class="flex justify-center mb-4">
+                        <input type="text" id="searchInput" placeholder="Buscar por estado o tipo..." class="form-control">
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm table-dark">
+                            <thead>
+                                <tr>
+                                    <th class="h-12 px-4 text-left align-middle font-medium w-[100px]">Estado</th>
+                                    <th class="h-12 px-4 text-left align-middle font-medium">Solicitud</th>
+                                    <th class="h-12 px-4 text-left align-middle font-medium">
+                                        Creado por</th>
+                                    <th class="h-12 px-4 text-left align-middle font-medium">Fecha de Solicitud</th>
+                                    <th class="h-12 px-4 align-middle font-medium w-[160px] text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if solicitudes %}
+                                    {% for solicitud in solicitudes %}
+                                        <tr class="border-t border-gray-700">
+                                            <td class="p-4 align-middle font-medium">{{ solicitud.estado_sol }}</td>
+                                            <td class="p-4 align-middle">{{ solicitud.tipo_sol }}</td>
+                                            <td class="p-4 align-middle">{{solicitud.id_usuario}}</td>
+                                            <td class="p-4 align-middle">{{ solicitud.created_at }}</td>
+                                            <td class="p-4 align-middle text-center">
+                                                <button class="btn btn-info" onclick="location.href='{% url 'verSolicitud' pk=solicitud.id_sol %}'">
+                                                    <i class="fas fa-eye"></i> Ver
+                                                </button>
+                                                {% if request.user.is_staff %}
+                                                    <button class="btn btn-primary" onclick="location.href='{% url 'editarSolicitud' pk=solicitud.id_sol %}'">
+                                                        <i class="fas fa-pencil-alt"></i> Editar
+                                                    </button>
+                                                
+                                                    <button class="btn btn-danger" onclick="location.href='{% url 'borrarSolicitud' pk=solicitud.id_sol %}'">
+                                                        <span class="fas fa-trash-alt"></span> Borrar
+                                                    </button>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        
+        searchInput.addEventListener('keyup', function() {
+            const term = searchInput.value.toLowerCase();
+            const rows = document.querySelectorAll("tbody tr");
+            
+            rows.forEach(row => {
+                const estado = row.cells[0].textContent.toLowerCase();
+                const tipo = row.cells[1].textContent.toLowerCase();
+                if (estado.includes(term) || tipo.includes(term)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    });
+    </script>
+{% endblock %}
+
